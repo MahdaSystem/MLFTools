@@ -6,7 +6,7 @@
  **********************************************************************************
  */
 
-/* Define to prevent recursive inclusion ----------------------------------------*/
+//* Define to prevent recursive inclusion ----------------------------------------*/
 #ifndef _MLF_H_
 #define _MLF_H_
 
@@ -15,100 +15,136 @@ extern "C" {
 #endif
 
 
-/* Includes ---------------------------------------------------------------------*/
+//* Includes ---------------------------------------------------------------------*/
 #include <stdint.h>
 
-/* Defines ----------------------------------------------------------------------*/
-#define MAX_CHANNEL_NAME_SIZE 20
+//? User Configurations and Notes ------------------------------------------------- //
+#define MAX_CHANNEL_NAME_SIZE 20      // Maximum number of channel name size
+//? ------------------------------------------------------------------------------- //
 
-/* Exported Data Types ----------------------------------------------------------*/
+/**
+ ** ==================================================================================
+ **                           ##### Public Variables #####                               
+ ** ==================================================================================
+ **/
 
 /**
  * @brief  MLF channel name
  */
-typedef char MLF_ChannelName[MAX_CHANNEL_NAME_SIZE + 1];
+typedef char 
+MLF_ChannelName_t[MAX_CHANNEL_NAME_SIZE + 1];
+
+/**
+ ** ==================================================================================
+ **                                ##### Enums #####                               
+ ** ==================================================================================
+ **/
 
 /**
  * @brief  MLF channel data type
  */
-typedef enum  {
-MLF_ELEMENT_INVALID   = 0,
-MLF_ELEMENT_INT8      	 ,
-MLF_ELEMENT_INT16        ,
-MLF_ELEMENT_INT32        ,
-MLF_ELEMENT_INT64     	 ,
-MLF_ELEMENT_UINT8        ,
-MLF_ELEMENT_UINT16       ,
-MLF_ELEMENT_UINT32       ,
-MLF_ELEMENT_UINT64       ,
-MLF_ELEMENT_FLOAT32      ,
-MLF_ELEMENT_FLOAT64      ,
-MLF_ELEMENT_BIT          ,
-MLF_ELEMENT_DATETIME     
-} MLF_ChannelDataType;
+typedef enum
+{
+  MLF_ELEMENT_INVALID   = 0, // Do not use this data type.
+  MLF_ELEMENT_INT8      	 , // int8_t data type
+  MLF_ELEMENT_INT16        , // int16_t data type
+  MLF_ELEMENT_INT32        , // int32_t data type
+  MLF_ELEMENT_INT64     	 , // int64_t data type
+  MLF_ELEMENT_UINT8        , // uint8_t data type
+  MLF_ELEMENT_UINT16       , // uint16_t data type
+  MLF_ELEMENT_UINT32       , // uint32_t data type
+  MLF_ELEMENT_UINT64       , // uint64_t data type
+  MLF_ELEMENT_FLOAT32      , // float data type
+  MLF_ELEMENT_FLOAT64      , // double data type
+  MLF_ELEMENT_BOOL         , // bit data type. use 1 byte for each bit
+  MLF_ELEMENT_DATETIME       // MLF_DateTime data type
+} MLF_ChannelDataType_t;
+
+/**
+ ** ==================================================================================
+ **                               ##### Structs #####                               
+ ** ==================================================================================
+ **/
 
 /**
  * @brief  MLF file handler
+ * @note   This struct will be filled in MLF_Init function
  */
 typedef struct 
 {
-  uint32_t  						 NumOfCh;
-	uint32_t							 ChNumber;
-	MLF_ChannelDataType 	*ChDataType;
-} MLF_Handler;
-
-/* Exported Constants -----------------------------------------------------------*/
+  uint32_t  						  NumOfCh;      // !!! DO NOT USE OR EDIT THIS !!!
+	uint32_t							  ChNumber;     // !!! DO NOT USE OR EDIT THIS !!!
+	MLF_ChannelDataType_t 	*ChDataType;  // !!! DO NOT USE OR EDIT THIS !!!
+} MLF_Handler_t;
 
 /**
- ==================================================================================
-                               ##### Functions #####                               
- ==================================================================================
+ ** ==================================================================================
+ **                               ##### Unions #####                               
+ ** ==================================================================================
+ **/
+
+/**
+ * @brief  MLF date and time struct
  */
+typedef union 
+{
+  struct
+  { 
+    uint64_t Fraction:20;   // positive fractions (10e6) of a second
+    uint64_t Second:34;     // date and time in second from 2000/1/1 to NOW, It can be calculated by MLF_TimeSecond function
+  };
+  uint64_t DataTimeU64;
+} MLF_DateTime_t;
 
 /**
- * @brief  Generate header part of MLF file
+ ** ==================================================================================
+ **                          ##### Public Functions #####                               
+ ** ==================================================================================
+ **/
+
+/**
+ * @brief  Generates header part of MLF file
  * @note   This function must be called at FIRST and ONCE!
  * @param  NumberOfChannels: number of channels
- * @param  ChNames: Pointer to channel names string
+ * @param  ChNames: Pointer to channel names string, See MLF_ChannelName_t struct. 
  * 				 @note		number of element: number of channels
- * @param	 ChDataTypes: Pointer to channels data types enum
+ * @param	 ChDataTypes: Pointer to channels data types enum, See MLF_ChannelDataType_t struct. 
  * 				 @note		number of element: number of channels
- *											 - MLF_ELEMENT_INVALID:  Do not use this data type.
- *                  		 - MLF_ELEMENT_INT8:     int8_t data type
- *                  		 - MLF_ELEMENT_INT16:    int16_t data type
- *                  		 - MLF_ELEMENT_INT32:    int32_t data type
- *                  		 - MLF_ELEMENT_INT64:    int64_t data type
- *                  		 - MLF_ELEMENT_UINT8:    uint8_t data type
- *                  		 - MLF_ELEMENT_UINT16:   uint16_t data type
- *                  		 - MLF_ELEMENT_UINT32:   uint32_t data type
- *                  		 - MLF_ELEMENT_UINT64:   uint64_t data type
- *                  		 - MLF_ELEMENT_FLOAT32:  float data type
- *                  		 - MLF_ELEMENT_FLOAT64:  double data type
- *                  		 - MLF_ELEMENT_BIT:      bit data type. use 1 byte for each bit	
- *											 - MLF_ELEMENT_DATETIME  uint32_t for Time 
  * @param  Buff: Pointer to buffer of MLF file.
  * @param  Size: Bytes count of data stored in Buff
- * // @param  WriteFunction: Pointer to writing function 
- * //	  		@note If you do not want to use, leave it as NULL
- * //				@brief  This is a function to write samples on MLF file
- * //       @param  Buff: Pointer to buffer of MLF file. Null value just calculates buffer size
- * //       @param  Size: bytes count of data stored in Buff
+ * !NOT IMPLEMENTED! @param  WriteFunction: Pointer to writing function 
+ * !NOT IMPLEMENTED! @note   If you do not want to use, leave it as NULL
+ * !NOT IMPLEMENTED! @brief  This is a function to write samples on MLF file
+ * !NOT IMPLEMENTED!         @param  Buff: Pointer to buffer of MLF file. Null value just calculates buffer size
+ * !NOT IMPLEMENTED!         @param  Size: bytes count of data stored in Buff
  * @retval None
  */
 void
-MLF_Init(MLF_Handler *Handler,uint32_t NumberOfChannels, MLF_ChannelName *ChNames, MLF_ChannelDataType *ChDataTypes ,uint8_t *Buff, uint32_t *Size/*,void *WriteFunction(uint8_t *Buff, uint16_t *Size)*/);
+MLF_Init(MLF_Handler_t *Handler,uint32_t NumberOfChannels, MLF_ChannelName_t *ChNames, MLF_ChannelDataType_t *ChDataTypes ,uint8_t *Buff, uint32_t *Size/*,void *WriteFunction(uint8_t *Buff, uint16_t *Size)*/);
 
 /**
- * @brief  Add a sample to MLF file 
-					 It has to be called for each channel BUT be carefull to call it in order
+ * @brief  Adds a sample to MLF file 
+ * @note	 It has to be called for each channel BUT be carefull to call it in order
  * @param  Samples: Pointer to sample
  * @param  Buff: Pointer to buffer of MLF file.
  * @param  Size: bytes count of data stored in Buff.
  * @retval None
  */
 void
-MLF_AddSample(MLF_Handler *Handler,void *Samples, uint8_t *Buff, uint32_t *Size);
+MLF_AddSample(MLF_Handler_t *Handler,void *Samples, uint8_t *Buff, uint32_t *Size);
 
+/**
+ * @brief  Calculates "second" part of MLF_DateTime_t from normal time and date
+ * @param  Year: Normal Year (2000 to ...)
+ * @param  Month: Normal Month (1 to 12)
+ * @param  Day: Normal Day (1 to 31)
+ * @param  Hour: Normal Hour (0 to 23)
+ * @param  Minute: Normal Minute (0 to 59)
+ * @param  Second: Normal Second (0 to 59)
+ * @retval "Second" part of MLF_DateTime_t
+ */
+uint64_t
+MLF_TimeSecond(uint16_t Year, uint8_t Month, uint8_t Day,uint8_t Hour, uint8_t Minute, uint8_t Second);
 
 #ifdef __cplusplus
 }

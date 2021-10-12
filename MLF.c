@@ -1,28 +1,44 @@
 /**
  **********************************************************************************
- * @file   MLF.h
+ * @file   MLF.c
  * @author Ali Moallem (https://github.com/AliMoal)
  * @brief  Generate MAHDA log file format (.MLF)
  **********************************************************************************
  */
 
-/* Includes ---------------------------------------------------------------------*/
+//* Private Includes -------------------------------------------------------------- //
 #include "MLF.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 
-/* Private Macros ---------------------------------------------------------------*/
-#define CheckASSERT(X) if (!X) return;
+//* Private Macros ---------------------------------------------------------------*/
+#define CheckASSERT(X) if (!X) return;                                                     // If the pointer (X) is not present, The function will be ended
+#define leapYear(year) (((year % 4 == 0 && year % 100 != 0) || year % 400 == 0) ? 1 : 0)   // Determines whether or not a year is leap year 
 
-/* Private Constants ------------------------------------------------------------*/
-#define MLF_HEADER_TAG  "MAHDALOGFILE"
-#define MLF_LOG_TYPE    0
-#define MLF_VERSION     3
+//* Private defines --------------------------------------------------------------*/
+#define MLF_HEADER_TAG  "MAHDALOGFILE" // Header Tag
+#define MLF_VERSION     4              // MLF API Version
+#define MLF_LOG_TYPE    1              // General Purpose Log
+#define MLF_FLAG_ENDIAN 0              // 0: Little Endian | 1: Big Endian
 
+// For using MLF_TimeSecond function
+#define MLF_BaseYear   2000            // Must be a multiple of 4
+#define MLF_BaseMonth  1               // 1 - 12
+#define MLF_BaseDay    1               // 1 - ...
 
-/* Private variables ------------------------------------------------------------*/
-const uint8_t DataTypeSize[13] =
+/**
+ ** ==================================================================================
+ **                      ##### Private constant Variables #####                               
+ ** ==================================================================================
+ **/
+
+/**
+ * @brief  Keeps the size of each data types
+ * @retval None
+ */
+static const 
+uint8_t DataTypeSize[13] =
 {
   0,
   sizeof(int8_t),
@@ -36,14 +52,26 @@ const uint8_t DataTypeSize[13] =
   sizeof(float),
   sizeof(double),
   sizeof(uint8_t),
-	sizeof(uint32_t)
+	sizeof(uint64_t)
 };
 
 /**
- ==================================================================================
-                           ##### Private Functions #####                           
- ==================================================================================
- */
+ * @brief  Specifies the number of days in the month
+ *         daysPerMonth[0][]: non leap year
+ *         daysPerMonth[1][]: leap year
+ */ 
+static const int8_t
+daysPerMonth[2][13] = 
+{
+  {-1, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31},
+  {-1, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
+};
+
+/**
+ *! ==================================================================================
+ *!                          ##### Private Functions #####                               
+ *! ==================================================================================
+ **/
 
 static void
 MLF_CopyU32LittleEndian(uint8_t *Dest, uint32_t Value)
@@ -54,45 +82,74 @@ MLF_CopyU32LittleEndian(uint8_t *Dest, uint32_t Value)
   Dest[3] = (Value) >> (24);
 }
 
+static uint32_t
+MLF_DateDef(uint8_t Day, uint8_t Month, uint16_t Year)
+{
+  int16_t y, m;
+  uint32_t total_days = 0;
+
+  if (Year < MLF_BaseYear)
+    return 0;
+
+  for (y = Year; y >= MLF_BaseYear; y--)
+  {
+    if (y == Year)
+    {
+      for (m = Month; m >= 1; m--)
+      {
+        if (m == Month)
+          total_days += Day;
+        else
+          total_days += daysPerMonth[leapYear(y)][m];
+      }
+    }
+    else if (y == MLF_BaseYear)
+    {
+      for (m = 12; m >= MLF_BaseMonth; m--)
+      {
+        if (m == MLF_BaseMonth)
+          total_days += daysPerMonth[leapYear(y)][m] - MLF_BaseDay;
+        else
+          total_days += daysPerMonth[leapYear(y)][m];
+      }
+    }
+    else
+    {
+      for (m = 12; m >= 1; m--)
+      {
+        total_days += daysPerMonth[leapYear(y)][m];
+      }
+    }
+  }
+
+  return total_days;
+}
 
 /**
- ==================================================================================
-                            ##### Public Functions #####                           
- ==================================================================================
- */
+ ** ==================================================================================
+ **                           ##### Public Functions #####                               
+ ** ==================================================================================
+ **/
 
 /**
- * @brief  Generate header part of MLF file
+ * @brief  Generates header part of MLF file
  * @note   This function must be called at FIRST and ONCE!
  * @param  NumberOfChannels: number of channels
- * @param  ChNames: Pointer to channel names string
+ * @param  ChNames: Pointer to channel names string, See MLF_ChannelName_t struct. 
  * 				 @note		number of element: number of channels
- * @param	 ChDataTypes: Pointer to channels data types enum
+ * @param	 ChDataTypes: Pointer to channels data types enum, See MLF_ChannelDataType_t struct. 
  * 				 @note		number of element: number of channels
- *											 - MLF_ELEMENT_INVALID:  Do not use this data type.
- *                  		 - MLF_ELEMENT_INT8:     int8_t data type
- *                  		 - MLF_ELEMENT_INT16:    int16_t data type
- *                  		 - MLF_ELEMENT_INT32:    int32_t data type
- *                  		 - MLF_ELEMENT_INT64:    int64_t data type
- *                  		 - MLF_ELEMENT_UINT8:    uint8_t data type
- *                  		 - MLF_ELEMENT_UINT16:   uint16_t data type
- *                  		 - MLF_ELEMENT_UINT32:   uint32_t data type
- *                  		 - MLF_ELEMENT_UINT64:   uint64_t data type
- *                  		 - MLF_ELEMENT_FLOAT32:  float data type
- *                  		 - MLF_ELEMENT_FLOAT64:  double data type
- *                  		 - MLF_ELEMENT_BIT:      bit data type. use 1 byte for each bit		
- *											 - MLF_ELEMENT_DATETIME  uint32_t for Time  
  * @param  Buff: Pointer to buffer of MLF file.
  * @param  Size: Bytes count of data stored in Buff
- * // @param  WriteFunction: Pointer to writing function 
- * //	  		@note If you do not want to use, leave it as NULL
- * //				@brief  This is a function to write samples on MLF file
- * //       @param  Buff: Pointer to buffer of MLF file. Null value just calculates buffer size
- * //       @param  Size: bytes count of data stored in Buff
+ * !NOT IMPLEMENTED! @param  WriteFunction: Pointer to writing function 
+ * !NOT IMPLEMENTED! @note   If you do not want to use, leave it as NULL
+ * !NOT IMPLEMENTED! @brief  This is a function to write samples on MLF file
+ * !NOT IMPLEMENTED!         @param  Buff: Pointer to buffer of MLF file. Null value just calculates buffer size
+ * !NOT IMPLEMENTED!         @param  Size: bytes count of data stored in Buff
  * @retval None
  */
 void
-MLF_Init(MLF_Handler *Handler,uint32_t NumberOfChannels, MLF_ChannelName *ChNames, MLF_ChannelDataType *ChDataTypes ,uint8_t *Buff, uint32_t *Size/*,void *WriteFunction(uint8_t *Buff, size_t *Size)*/)
+MLF_Init(MLF_Handler_t *Handler,uint32_t NumberOfChannels, MLF_ChannelName_t *ChNames, MLF_ChannelDataType_t *ChDataTypes ,uint8_t *Buff, uint32_t *Size/*,void *WriteFunction(uint8_t *Buff, size_t *Size)*/)
 {
 
 //	CheckASSERT(Handler);
@@ -106,12 +163,19 @@ MLF_Init(MLF_Handler *Handler,uint32_t NumberOfChannels, MLF_ChannelName *ChName
 	Handler->ChDataType = ChDataTypes;
 
 	*Size = (uint32_t)Buff;
+  // MLF Header Tag ("MAHDALOGFILE" is 12 Bytes)
   strcpy((char *)Buff, MLF_HEADER_TAG);
   Buff += strlen(MLF_HEADER_TAG);
-  MLF_CopyU32LittleEndian(Buff, MLF_LOG_TYPE);
-  Buff += 4;
+  // Version
   MLF_CopyU32LittleEndian(Buff, MLF_VERSION);
   Buff += 4;
+  // Log Type
+  MLF_CopyU32LittleEndian(Buff, MLF_LOG_TYPE);
+  Buff += 4;
+  // Flags (for LittleBig Endian Bit: 0)
+  MLF_CopyU32LittleEndian(Buff, 0 | MLF_FLAG_ENDIAN); 
+  Buff += 4;
+  // Number Of Channels
   MLF_CopyU32LittleEndian(Buff, NumberOfChannels);
   Buff += 4;
 	
@@ -120,26 +184,35 @@ MLF_Init(MLF_Handler *Handler,uint32_t NumberOfChannels, MLF_ChannelName *ChName
     MLF_CopyU32LittleEndian(Buff, ChDataTypes[counter]);
 		Buff += 1;
   }
-	
+  
   for (uint32_t counter = 0; counter < NumberOfChannels; counter++)
   {
     memset(Buff, 0, MAX_CHANNEL_NAME_SIZE + 1);
-    strcpy((char *)Buff, (const char *)ChNames[counter]);
-    Buff += strlen(ChNames[counter]) + 1; // Plus 1 to add a NULL value because of end of string
+    if(strlen(ChNames[counter]) <= MAX_CHANNEL_NAME_SIZE)
+    {
+      strcpy((char *)Buff, (const char *)ChNames[counter]);
+      Buff += strlen(ChNames[counter]) + 1; // Plus 1 to add a NULL value because of end of string
+    }
+    else
+    {
+      memcpy((char *)Buff, (const char *)ChNames[counter], MAX_CHANNEL_NAME_SIZE);
+      Buff += MAX_CHANNEL_NAME_SIZE + 1; // Plus 1 to add a NULL value because of end of string
+    } 
   }
+  
 	*Size = ((uint32_t)Buff) - (*Size);
 }
 
 /**
- * @brief  Add a sample to MLF file 
-					 It has to be called for each channel BUT be carefull to call it in order
+ * @brief  Adds a sample to MLF file 
+ * @note	 It has to be called for each channel BUT be carefull to call it in order
  * @param  Samples: Pointer to sample
  * @param  Buff: Pointer to buffer of MLF file.
  * @param  Size: bytes count of data stored in Buff.
  * @retval None
  */
 void
-MLF_AddSample(MLF_Handler *Handler,void *Samples, uint8_t *Buff, uint32_t *Size)
+MLF_AddSample(MLF_Handler_t *Handler,void *Samples, uint8_t *Buff, uint32_t *Size)
 {
 	
 //	CheckASSERT(Handler); // Comment this line in High Rate
@@ -152,7 +225,7 @@ MLF_AddSample(MLF_Handler *Handler,void *Samples, uint8_t *Buff, uint32_t *Size)
 	if ((Handler->ChNumber) >= (Handler->NumOfCh))
 		Handler->ChNumber = 0;
 	
-	if ((*Size) > 0) // 1 byte : int8_t uint8_t
+	if ((*Size) > 0) // 1 byte : int8_t uint8_t bool
 	{
 		Buff[0] = ((uint8_t *)Samples)[0];
 	}
@@ -175,3 +248,27 @@ MLF_AddSample(MLF_Handler *Handler,void *Samples, uint8_t *Buff, uint32_t *Size)
 //	memcpy(Buff,Samples,*Size);
 }
 
+/**
+ * @brief  Calculates "second" part of MLF_DateTime_t from normal time and date
+ * @param  Year: Normal Year (2000 to ...)
+ * @param  Month: Normal Month (1 to 12)
+ * @param  Day: Normal Day (1 to 31)
+ * @param  Hour: Normal Hour (0 to 23)
+ * @param  Minute: Normal Minute (0 to 59)
+ * @param  Second: Normal Second (0 to 59)
+ * @retval "Second" part of MLF_DateTime_t
+ */
+uint64_t
+MLF_TimeSecond(uint16_t Year, uint8_t Month, uint8_t Day, uint8_t Hour, uint8_t Minute, uint8_t Second)
+{
+  uint32_t DiffDay;
+  int64_t DiffSecond;
+
+  DiffDay = MLF_DateDef(Day, Month, Year);
+  DiffSecond  = (int64_t) (DiffDay * 86400ul);
+  DiffSecond += (int64_t) (Hour * 3600); 
+  DiffSecond += (int64_t) (Minute * 60);
+  DiffSecond += (int64_t) (Second);
+
+  return DiffSecond;
+}
