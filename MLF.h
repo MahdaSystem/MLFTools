@@ -82,14 +82,10 @@ typedef struct
 /**
  * @brief  MLF date and time struct
  */
-typedef union
+typedef struct
 {
-  struct
-  {
-    uint64_t Fraction : 20; // positive fractions (10e6) of a second
-    uint64_t Second : 34;   // date and time in second from 1970/1/1 to NOW, It can be calculated by MLF_TimeSecond function
-  };
-  uint64_t DataTimeU64;
+  uint32_t Fraction; // 30 Bit | positive fractions (10e6) of a second
+  uint64_t Second;   // 34 Bit | date and time in second from 1970/1/1 to NOW, It can be calculated by MLF_TimeSecond function
 } MLF_DateTime_t;
 /**
  ** ==================================================================================
