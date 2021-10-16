@@ -1,9 +1,11 @@
 /**
  **********************************************************************************
- * @file   MLF.c
+ * @file   MLF.h
  * @author Hossein.M (https://github.com/Hossein-M98)
  *         Ali Moallem (https://github.com/AliMoal)
  * @brief  Generate MAHDA log file format (.MLF)
+ * @note   Use "Better comments" extension for VSCode to get the best details
+ *         ExtensionID: aaron-bond.better-comments
  **********************************************************************************
  */
 
@@ -14,21 +16,19 @@
 #include <string.h>
 
 //* Private Macros ---------------------------------------------------------------*/
-#define CheckASSERT(X) \
-  if (!X)              \
-    return;                                                                              // If the pointer (X) is not present, The function will be ended
-#define leapYear(year) (((year % 4 == 0 && year % 100 != 0) || year % 400 == 0) ? 1 : 0) // Determines whether or not a year is leap year
+#define CheckASSERT(X) if (!X) return;                                                     // If the pointer (X) is not present, The function will be ended
+#define leapYear(year) (((year % 4 == 0 && year % 100 != 0) || year % 400 == 0) ? 1 : 0)   // Determines whether or not a year is leap year
 
 //* Private defines --------------------------------------------------------------*/
-#define MLF_HEADER_TAG "MAHDALOGFILE" // Header Tag
-#define MLF_VERSION 4                 // MLF API Version
-#define MLF_LOG_TYPE 1                // General Purpose Log
-#define MLF_FLAG_ENDIAN 0             // 0: Little Endian | 1: Big Endian
+#define MLF_HEADER_TAG  "MAHDALOGFILE" // Header Tag
+#define MLF_VERSION     4              // MLF API Version
+#define MLF_LOG_TYPE    1              // General Purpose Log
+#define MLF_FLAG_ENDIAN 0              // 0: Little Endian | 1: Big Endian
 
-// For using MLF_TimeSecond function
-#define MLF_BaseYear 1970 // ...
-#define MLF_BaseMonth 1   // 1 - 12
-#define MLF_BaseDay 1     // 1 - ...
+// For using MLF_TimeSecond function (Recommended to use Unix time: 1970/1/1)
+#define MLF_BaseYear   1970            // ...
+#define MLF_BaseMonth  1               // 1 - 12
+#define MLF_BaseDay    1               // 1 - ...
 
 /**
  ** ==================================================================================
@@ -140,7 +140,7 @@ MLF_DateDef(uint8_t Day, uint8_t Month, uint16_t Year)
  * @param  ChNames: Pointer to channel names string, See MLF_ChannelName_t struct.
  * 				 @note		number of element: number of channels
  * @param	 ChDataTypes: Pointer to channels data types enum, See MLF_ChannelDataType_t struct.
- * 				 @note		number of element: number of channels
+ * 				 @note		number of element: number of channels //! USER MUST NOT EDIT THIS DURING PROGRAM
  * @param  Buff: Pointer to buffer of MLF file.
  * @param  Size: Bytes count of data stored in Buff
  * !NOT IMPLEMENTED! @param  WriteFunction: Pointer to writing function
@@ -150,7 +150,8 @@ MLF_DateDef(uint8_t Day, uint8_t Month, uint16_t Year)
  * !NOT IMPLEMENTED!         @param  Size: bytes count of data stored in Buff
  * @retval None
  */
-void MLF_Init(MLF_Handler_t *Handler, uint32_t NumberOfChannels, MLF_ChannelName_t *ChNames, MLF_ChannelDataType_t *ChDataTypes, uint8_t *Buff, uint32_t *Size /*,void *WriteFunction(uint8_t *Buff, size_t *Size)*/)
+void
+MLF_Init(MLF_Handler_t *Handler, uint32_t NumberOfChannels, MLF_ChannelName_t *ChNames, MLF_ChannelDataType_t *ChDataTypes, uint8_t *Buff, uint32_t *Size /*,void *WriteFunction(uint8_t *Buff, size_t *Size)*/)
 {
 
   //	CheckASSERT(Handler);
@@ -212,7 +213,8 @@ void MLF_Init(MLF_Handler_t *Handler, uint32_t NumberOfChannels, MLF_ChannelName
  * @param  Size: bytes count of data stored in Buff.
  * @retval None
  */
-void MLF_AddSample(MLF_Handler_t *Handler, void *Samples, uint8_t *Buff, uint32_t *Size)
+void
+MLF_AddSample(MLF_Handler_t *Handler, void *Samples, uint8_t *Buff, uint32_t *Size)
 {
 
   //	CheckASSERT(Handler); // Comment this line in High Rate
@@ -250,7 +252,7 @@ void MLF_AddSample(MLF_Handler_t *Handler, void *Samples, uint8_t *Buff, uint32_
 
 /**
  * @brief  Calculates "second" part of MLF_DateTime_t from normal time and date
- * @param  Year: Normal Year (2000 to ...)
+ * @param  Year: Normal Year (1970 to ...)
  * @param  Month: Normal Month (1 to 12)
  * @param  Day: Normal Day (1 to 31)
  * @param  Hour: Normal Hour (0 to 23)
@@ -265,7 +267,7 @@ MLF_TimeSecond(uint16_t Year, uint8_t Month, uint8_t Day, uint8_t Hour, uint8_t 
   int64_t DiffSecond;
 
   DiffDay = MLF_DateDef(Day, Month, Year);
-  DiffSecond = (int64_t)(DiffDay * 86400ul);
+  DiffSecond  = (int64_t)(DiffDay * 86400ul);
   DiffSecond += (int64_t)(Hour * 3600);
   DiffSecond += (int64_t)(Minute * 60);
   DiffSecond += (int64_t)(Second);

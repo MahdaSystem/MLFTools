@@ -4,6 +4,8 @@
  * @author Hossein.M (https://github.com/Hossein-M98)
  *         Ali Moallem (https://github.com/AliMoal)
  * @brief  Generate MAHDA log file format (.MLF)
+ * @note   Use "Better comments" extension for VSCode to get the best details
+ *         ExtensionID: aaron-bond.better-comments
  **********************************************************************************
  */
 
@@ -21,18 +23,18 @@ extern "C"
 
 //? User Configurations and Notes ------------------------------------------------- //
 #define MAX_CHANNEL_NAME_SIZE 20 // Maximum number of channel name size
-  //? ------------------------------------------------------------------------------- //
+//? ------------------------------------------------------------------------------- //
 
 /**
  ** ==================================================================================
- **                           ##### Public Variables #####
+ **                           ##### Public Typedef #####
  ** ==================================================================================
  **/
 /**
  * @brief  MLF channel name
  */
 typedef char
-    MLF_ChannelName_t[MAX_CHANNEL_NAME_SIZE + 1];
+MLF_ChannelName_t[MAX_CHANNEL_NAME_SIZE + 1];
 /**
  ** ==================================================================================
  **                                ##### Enums #####
@@ -85,7 +87,7 @@ typedef union
   struct
   {
     uint64_t Fraction : 20; // positive fractions (10e6) of a second
-    uint64_t Second : 34;   // date and time in second from 2000/1/1 to NOW, It can be calculated by MLF_TimeSecond function
+    uint64_t Second : 34;   // date and time in second from 1970/1/1 to NOW, It can be calculated by MLF_TimeSecond function
   };
   uint64_t DataTimeU64;
 } MLF_DateTime_t;
@@ -101,7 +103,7 @@ typedef union
  * @param  ChNames: Pointer to channel names string, See MLF_ChannelName_t struct.
  * 				 @note		number of element: number of channels
  * @param	 ChDataTypes: Pointer to channels data types enum, See MLF_ChannelDataType_t struct.
- * 				 @note		number of element: number of channels
+ * 				 @note		number of element: number of channels //! USER MUST NOT EDIT THIS DURING PROGRAM
  * @param  Buff: Pointer to buffer of MLF file.
  * @param  Size: Bytes count of data stored in Buff
  * !NOT IMPLEMENTED! @param  WriteFunction: Pointer to writing function
@@ -125,7 +127,7 @@ void
 MLF_AddSample(MLF_Handler_t *Handler, void *Samples, uint8_t *Buff, uint32_t *Size);
 /**
  * @brief  Calculates "second" part of MLF_DateTime_t from normal time and date
- * @param  Year: Normal Year (2000 to ...)
+ * @param  Year: Normal Year (1970 to ...)
  * @param  Month: Normal Month (1 to 12)
  * @param  Day: Normal Day (1 to 31)
  * @param  Hour: Normal Hour (0 to 23)
