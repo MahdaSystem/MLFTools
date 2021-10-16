@@ -1,7 +1,8 @@
 /**
  **********************************************************************************
  * @file   MLF.c
- * @author Ali Moallem (https://github.com/AliMoal)
+ * @author Hossein.M (https://github.com/Hossein-M98)
+ *         Ali Moallem (https://github.com/AliMoal)
  * @brief  Generate MAHDA log file format (.MLF)
  **********************************************************************************
  */
@@ -23,7 +24,7 @@
 #define MLF_FLAG_ENDIAN 0              // 0: Little Endian | 1: Big Endian
 
 // For using MLF_TimeSecond function
-#define MLF_BaseYear   2000            // Must be a multiple of 4
+#define MLF_BaseYear   1970            // ...
 #define MLF_BaseMonth  1               // 1 - 12
 #define MLF_BaseDay    1               // 1 - ...
 

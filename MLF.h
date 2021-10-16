@@ -1,7 +1,8 @@
 /**
  **********************************************************************************
  * @file   MLF.h
- * @author Ali Moallem (https://github.com/AliMoal)
+ * @author Hossein.M (https://github.com/Hossein-M98)
+ *         Ali Moallem (https://github.com/AliMoal)
  * @brief  Generate MAHDA log file format (.MLF)
  **********************************************************************************
  */
