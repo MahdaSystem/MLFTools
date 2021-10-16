@@ -223,10 +223,6 @@ MLF_AddSample(MLF_Handler_t *Handler, void *Samples, uint8_t *Buff, uint32_t *Si
   //	CheckASSERT(Size);    // Comment this line in High Rate
 
   *Size = DataTypeSize[Handler->ChDataType[Handler->ChNumber]];
-  Handler->ChNumber++;
-  if ((Handler->ChNumber) >= (Handler->NumOfCh))
-    Handler->ChNumber = 0;
-
   if (Handler->ChDataType[Handler->ChNumber] == MLF_ELEMENT_DATETIME)
   {
     Buff[0] =  ((MLF_DateTime_t *)Samples)->Fraction & 0xFF;
@@ -238,8 +234,15 @@ MLF_AddSample(MLF_Handler_t *Handler, void *Samples, uint8_t *Buff, uint32_t *Si
     Buff[5] =  (((MLF_DateTime_t *)Samples)->Second >> 10) & 0xFF;
     Buff[6] =  (((MLF_DateTime_t *)Samples)->Second >> 18) & 0xFF;
     Buff[7] =  (((MLF_DateTime_t *)Samples)->Second >> 26) & 0xFF;
+    Handler->ChNumber++;
+    if ((Handler->ChNumber) >= (Handler->NumOfCh))
+      Handler->ChNumber = 0;
     return;
   }
+
+  Handler->ChNumber++;
+  if ((Handler->ChNumber) >= (Handler->NumOfCh))
+    Handler->ChNumber = 0;
 
   if ((*Size) > 0) // 1 byte : int8_t uint8_t bool
   {
