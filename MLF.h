@@ -117,6 +117,7 @@ MLF_Init(MLF_Handler_t *Handler, uint32_t NumberOfChannels, MLF_ChannelName_t *C
  * @note	 It has to be called for each channel BUT be carefull to call it in order
  * @param  Samples: Pointer to sample
  * @param  Buff: Pointer to buffer of MLF file.
+ *         @note    To get the max number of data to be written, pass Buff as NULL
  * @param  Size: bytes count of data stored in Buff.
  * @retval None
  */

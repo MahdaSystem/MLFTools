@@ -217,6 +217,7 @@ MLF_Init(MLF_Handler_t *Handler, uint32_t NumberOfChannels, MLF_ChannelName_t *C
  * @note	 It has to be called for each channel BUT be carefull to call it in order
  * @param  Samples: Pointer to sample
  * @param  Buff: Pointer to buffer of MLF file.
+ *         @note    To get the max number of data to be written, pass Buff as NULL
  * @param  Size: bytes count of data stored in Buff.
  * @retval None
  */
@@ -227,9 +228,13 @@ MLF_AddSample(MLF_Handler_t *Handler, void *Samples, uint8_t *Buff, uint32_t *Si
   //	CheckASSERT(Handler); // Comment this line in High Rate
   //	CheckASSERT(Samples); // Comment this line in High Rate
   //  CheckASSERT(Buff);    // Comment this line in High Rate
-  //	CheckASSERT(Size);    // Comment this line in High Rate
+  //	CheckASSERT(Size);    // Comment this line in High Rate 
 
   *Size = DataTypeSize[Handler->ChDataType[Handler->ChNumber]];
+
+  if (!Buff)
+    return;
+
   if (Handler->ChDataType[Handler->ChNumber] == MLF_ELEMENT_DATETIME)
   {
     Buff[0] =  ((MLF_DateTime_t *)Samples)->Fraction & 0xFF;
