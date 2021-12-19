@@ -101,6 +101,7 @@ typedef struct
  * @param	 ChDataTypes: Pointer to channels data types enum, See MLF_ChannelDataType_t struct.
  * 				 @note		number of element: number of channels //! USER MUST NOT EDIT THIS DURING PROGRAM
  * @param  Buff: Pointer to buffer of MLF file.
+ *         @note    To get the max number of data to be written, pass Buff as NULL
  * @param  Size: Bytes count of data stored in Buff
  * !NOT IMPLEMENTED! @param  WriteFunction: Pointer to writing function
  * !NOT IMPLEMENTED! @note   If you do not want to use, leave it as NULL

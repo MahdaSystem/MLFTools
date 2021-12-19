@@ -142,6 +142,7 @@ MLF_DateDef(uint8_t Day, uint8_t Month, uint16_t Year)
  * @param	 ChDataTypes: Pointer to channels data types enum, See MLF_ChannelDataType_t struct.
  * 				 @note		number of element: number of channels //! USER MUST NOT EDIT THIS DURING PROGRAM
  * @param  Buff: Pointer to buffer of MLF file.
+ *         @note    To get the max number of data to be written, pass Buff as NULL
  * @param  Size: Bytes count of data stored in Buff
  * !NOT IMPLEMENTED! @param  WriteFunction: Pointer to writing function
  * !NOT IMPLEMENTED! @note   If you do not want to use, leave it as NULL
@@ -159,6 +160,12 @@ MLF_Init(MLF_Handler_t *Handler, uint32_t NumberOfChannels, MLF_ChannelName_t *C
   //	CheckASSERT(ChDataTypes);
   //  CheckASSERT(Buff);
   //	CheckASSERT(Size);
+
+  if (!Buff)
+  {
+    *Size = 28 + NumberOfChannels * (1 + MAX_CHANNEL_NAME_SIZE);
+    return;
+  }
 
   Handler->NumOfCh = NumberOfChannels;
   Handler->ChNumber = 0;
