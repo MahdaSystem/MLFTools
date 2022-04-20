@@ -163,7 +163,7 @@ MLF_Init(MLF_Handler_t *Handler, uint32_t NumberOfChannels, MLF_ChannelName_t *C
 
   if (!Buff)
   {
-    *Size = 28 + NumberOfChannels * (1 + MAX_CHANNEL_NAME_SIZE);
+    *Size = 28 + NumberOfChannels * (2 + MAX_CHANNEL_NAME_SIZE);
     return;
   }
 
