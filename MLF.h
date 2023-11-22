@@ -22,7 +22,7 @@ extern "C"
 #include <stdint.h>
 
 //? User Configurations and Notes ------------------------------------------------- //
-#define MAX_CHANNEL_NAME_SIZE 20 // Maximum number of channel name size
+#define MLF_CONFIG_MAX_CHANNEL_NAME_SIZE 20 // Maximum number of channel name size
 //? ------------------------------------------------------------------------------- //
 
 /**
@@ -34,7 +34,7 @@ extern "C"
  * @brief  MLF channel name
  */
 typedef char
-MLF_ChannelName_t[MAX_CHANNEL_NAME_SIZE + 1];
+MLF_ChannelName_t[MLF_CONFIG_MAX_CHANNEL_NAME_SIZE + 1];
 /**
  ** ==================================================================================
  **                                ##### Enums #####
