@@ -163,7 +163,7 @@ MLF_Init(MLF_Handler_t *Handler, uint32_t NumberOfChannels, MLF_ChannelName_t *C
 
   if (!Buff)
   {
-    *Size = 28 + NumberOfChannels * (2 + MAX_CHANNEL_NAME_SIZE);
+    *Size = 28 + NumberOfChannels * (2 + MLF_CONFIG_MAX_CHANNEL_NAME_SIZE);
     return;
   }
 
@@ -196,16 +196,16 @@ MLF_Init(MLF_Handler_t *Handler, uint32_t NumberOfChannels, MLF_ChannelName_t *C
 
   for (uint32_t counter = 0; counter < NumberOfChannels; counter++)
   {
-    memset(Buff, 0, MAX_CHANNEL_NAME_SIZE + 1);
-    if (strlen(ChNames[counter]) <= MAX_CHANNEL_NAME_SIZE)
+    memset(Buff, 0, MLF_CONFIG_MAX_CHANNEL_NAME_SIZE + 1);
+    if (strlen(ChNames[counter]) <= MLF_CONFIG_MAX_CHANNEL_NAME_SIZE)
     {
       strcpy((char *)Buff, (const char *)ChNames[counter]);
       Buff += strlen(ChNames[counter]) + 1; // Plus 1 to add a NULL value because of end of string
     }
     else
     {
-      memcpy((char *)Buff, (const char *)ChNames[counter], MAX_CHANNEL_NAME_SIZE);
-      Buff += MAX_CHANNEL_NAME_SIZE + 1; // Plus 1 to add a NULL value because of end of string
+      memcpy((char *)Buff, (const char *)ChNames[counter], MLF_CONFIG_MAX_CHANNEL_NAME_SIZE);
+      Buff += MLF_CONFIG_MAX_CHANNEL_NAME_SIZE + 1; // Plus 1 to add a NULL value because of end of string
     }
   }
 
