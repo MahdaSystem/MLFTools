@@ -1,6 +1,6 @@
 /**
  **********************************************************************************
- * @file   MLF_Config.h
+ * @file   main.c
  * @author Hossein.M (https://github.com/Hossein-M98)
  * @brief  Basic example for MLF library
  **********************************************************************************
